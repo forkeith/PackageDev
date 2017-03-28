@@ -1,0 +1,148 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/3/syntax.html
+name: Sublime Text Settings (JSON)
+file_extensions:
+  - sublime-settings
+scope: source.json.sublime.settings
+contexts:
+  main:
+    - include: comments
+    - match: \{
+      scope: meta.structure.dictionary.json punctuation.definition.dictionary.begin.json
+      push:
+        - meta_content_scope: meta.structure.dictionary.json meta.settings.collection.sublime-settings
+        - match: \}
+          scope: meta.structure.dictionary.json punctuation.definition.dictionary.end.json
+          set: only-comments
+        - include: known-booleans
+        - match: (")
+          scope: punctuation.definition.string.begin.json
+          push:
+            - meta_scope: meta.structure.dictionary.key.json meta.setting-key.sublime-settings string.quoted.double.json
+            - match: (")
+              scope: punctuation.definition.string.end.json
+              set: expect-colon
+        - include: comments
+        - match: '[^,\s]'
+          scope: invalid.illegal.expect-key.sublime-settings
+    - match: \S
+      scope: invalid.illegal.expected-dictionary.sublime-settings
+
+  only-comments:
+    - include: comments
+    - match: '[^/\s]+'
+      scope: invalid.illegal.expected-comment-or-eof.sublime-settings
+
+  comments:
+    - include: scope:source.js#comments
+
+  expect-colon:
+    - include: comments
+    - match: ':'
+      scope: punctuation.separator.dictionary.key-value.json
+      pop: true
+    - match: '(?=[,}])'
+      pop: true
+    - match: '\S'
+      scope: invalid.illegal.expected-colon.json
+
+  known-booleans:
+    - match: |-
+        (?x)
+        (")
+        (
+           always_prompt_for_file_reload
+        |  always_show_minimap_viewport
+        |  animation_enabled
+        |  atomic_save
+        |  auto_close_tags
+        |  auto_complete
+        |  auto_complete_commit_on_tab
+        |  auto_complete_cycle
+        |  auto_complete_with_fields
+        |  auto_find_in_selection
+        |  auto_indent
+        |  auto_match_enabled
+        |  bold_folder_labels
+        |  close_windows_when_empty
+        |  copy_with_empty_selection
+        |  create_window_at_startup
+        |  detect_indentation
+        |  drag_text
+        |  draw_centered
+        |  draw_indent_guides
+        |  draw_minimap_border
+        |  draw_shadows
+        |  enable_hexadecimal_encoding
+        |  enable_tab_scrolling
+        |  ensure_newline_at_eof_on_save
+        |  fade_fold_buttons
+        |  find_selected_text
+        |  fold_buttons
+        |  gutter
+        |  highlight_line
+        |  highlight_modified_tabs
+        |  hot_exit
+        |  indent_subsequent_lines
+        |  indent_to_bracket
+        |  index_files
+        |  line_numbers
+        |  match_brackets
+        |  match_brackets_angle
+        |  match_brackets_braces
+        |  match_brackets_content
+        |  match_brackets_square
+        |  match_selection
+        |  match_tags
+        |  move_to_limit_on_up_down
+        |  open_files_in_new_window
+        |  preview_on_click
+        |  remember_full_screen
+        |  save_on_focus_lost
+        |  scroll_past_end
+        |  shift_tab_unindent
+        |  show_definitions
+        |  show_encoding
+        |  show_errors_inline
+        |  show_full_path
+        |  show_line_endings
+        |  show_panel_on_build
+        |  show_tab_close_buttons
+        |  smart_indent
+        |  spell_check
+        |  tab_completion
+        |  translate_tabs_to_spaces
+        |  tree_animation_enabled
+        |  trim_automatic_white_space
+        |  trim_trailing_white_space_on_save
+        |  use_simple_full_screen
+        |  use_tab_stops
+        )
+        (")
+      captures:
+        1: punctuation.definition.string.begin.json
+        2: keyword.other.key.boolean.sublime-settings
+        3: punctuation.definition.string.end.json
+      scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
+      push: [in-dictionary-expect-comma, expect-boolean, expect-colon]
+
+  in-dictionary-expect-comma:
+    - match: (?=\})
+      pop: true
+    - include: comments
+    - match: ','
+      scope: punctuation.separator.dictionary.pair.json
+      pop: true
+    - match: \S
+      scope: invalid.illegal.expected-comma.inside-dictionary.json
+
+  expect-boolean:
+    - match: \b(?:true|false)\b
+      scope: constant.language.json
+      pop: true
+    - include: comments
+    - match: (?=[},\]])
+      pop: true
+    - match: \S
+      scope: invalid.illegal.expected-boolean.sublime-settings
