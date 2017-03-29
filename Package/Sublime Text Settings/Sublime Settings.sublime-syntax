@@ -17,6 +17,7 @@ contexts:
           set: only-comments
         - include: known-booleans
         - include: known-strings
+        - include: known-numbers
         - match: (")
           scope: punctuation.definition.string.begin.json
           push:
@@ -417,3 +418,65 @@ contexts:
         - meta_scope: meta.structure.dictionary.value.json string.quoted.double.json invalid.deprecated.unexpected-value.overlay-scroll-bars.sublime-settings
         - include: close-string-dict-value
     - include: in-dictionary-expect-string
+
+  known-numbers:
+    - match: |-
+        (?x)
+        (")
+        (
+           auto_complete_delay
+        |  auto_complete_size_limit
+        |  caret_extra_bottom
+        |  caret_extra_top
+        |  caret_extra_width
+        |  font_size
+        |  index_workers
+        |  line_padding_bottom
+        |  line_padding_top
+        |  margin
+        |  scroll_speed
+        |  tab_size
+        |  wrap_width
+        )
+        (")
+      captures:
+        1: punctuation.definition.string.begin.json
+        2: keyword.other.key.number.sublime-settings
+        3: punctuation.definition.string.end.json
+      scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
+      push: [expect-number, expect-colon]
+
+  expect-number:
+    - meta_scope: meta.expect.number.sublime-settings
+    # handles integer and decimal numbers
+    - match: |-
+        (?x:         # turn on extended mode
+          -?         # an optional minus
+          (?:
+            0        # a zero
+            |        # ...or...
+            [1-9]    # a 1-9 character
+            \d*      # followed by zero or more digits
+          )
+          (?:
+            (?:
+              \.     # a period
+              \d+    # followed by one or more digits
+            )?
+            (?:
+              [eE]   # an e character
+              [+-]?  # followed by an option +/-
+              \d+    # followed by one or more digits
+            )?       # make exponent optional
+          )?         # make decimal portion optional
+        )
+      scope: meta.structure.dictionary.value.json constant.numeric.json
+      set: in-dictionary-expect-comma
+    - include: in-dictionary-expect-value
+    - match: (\S)\s*(,)
+      captures:
+        1: invalid.illegal.expected-number.sublime-settings
+        2: punctuation.separator.dictionary.pair.json
+      pop: true
+    - match: \S
+      scope: invalid.illegal.expected-number.sublime-settings
