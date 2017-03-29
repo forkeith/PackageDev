@@ -125,14 +125,14 @@ contexts:
         2: keyword.other.key.boolean.sublime-settings
         3: punctuation.definition.string.end.json
       scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
-      push: [in-dictionary-expect-comma, expect-boolean, expect-colon]
+      push: [expect-boolean, expect-colon]
     - match: (")(word_wrap)(")
       captures:
         1: punctuation.definition.string.begin.json
         2: keyword.other.key.boolean.sublime-settings
         3: punctuation.definition.string.end.json
       scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
-      push: [in-dictionary-expect-comma, expect-boolean-or-auto, expect-colon]
+      push: [expect-boolean-or-auto, expect-colon]
 
   in-dictionary-expect-comma:
     - match: (?=\})
@@ -148,10 +148,12 @@ contexts:
     - meta_scope: meta.expect.boolean.sublime-settings
     - match: \b(?:true|false)\b
       scope: meta.structure.dictionary.value.json constant.language.json
-      pop: true
+      set: in-dictionary-expect-comma
     - include: comments
-    - match: \s*(?=[},\]])
+    - match: \s*(?=[},])(,)?
       scope: invalid.illegal.expected-value.json
+      captures:
+        1: punctuation.separator.dictionary.pair.json
       pop: true
     - match: \S
       scope: invalid.illegal.expected-boolean.sublime-settings
@@ -163,15 +165,14 @@ contexts:
       captures:
         1: punctuation.definition.string.begin.json
         3: punctuation.definition.string.end.json
-      pop: true
+      set: in-dictionary-expect-comma
     - match: (")
       scope: punctuation.definition.string.begin.json
       set:
         - meta_scope: meta.structure.dictionary.value.json string.quoted.double.json invalid.deprecated.unexpected-value.sublime-settings
-        - match: (")
-          scope: punctuation.definition.string.end.json
-          pop: true
-        - match: $\n?
-          scope: invalid.illegal.unclosed-string.json
-          pop: true
+        - match: (")|($\n?)
+          captures:
+            1: punctuation.definition.string.end.json
+            2: invalid.illegal.unclosed-string.json
+          set: in-dictionary-expect-comma
     - include: expect-boolean
