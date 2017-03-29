@@ -126,6 +126,13 @@ contexts:
         3: punctuation.definition.string.end.json
       scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
       push: [in-dictionary-expect-comma, expect-boolean, expect-colon]
+    - match: (")(word_wrap)(")
+      captures:
+        1: punctuation.definition.string.begin.json
+        2: keyword.other.key.boolean.sublime-settings
+        3: punctuation.definition.string.end.json
+      scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
+      push: [in-dictionary-expect-comma, expect-boolean-or-auto, expect-colon]
 
   in-dictionary-expect-comma:
     - match: (?=\})
@@ -138,11 +145,33 @@ contexts:
       scope: invalid.illegal.expected-comma.inside-dictionary.json
 
   expect-boolean:
+    - meta_scope: meta.expect.boolean.sublime-settings
     - match: \b(?:true|false)\b
-      scope: constant.language.json
+      scope: meta.structure.dictionary.value.json constant.language.json
       pop: true
     - include: comments
-    - match: (?=[},\]])
+    - match: \s*(?=[},\]])
+      scope: invalid.illegal.expected-value.json
       pop: true
     - match: \S
       scope: invalid.illegal.expected-boolean.sublime-settings
+
+  expect-boolean-or-auto:
+    - meta_scope: meta.expect.boolean.word_wrap.sublime-settings
+    - match: (")(auto)(")
+      scope: meta.structure.dictionary.value.json string.quoted.double.json
+      captures:
+        1: punctuation.definition.string.begin.json
+        3: punctuation.definition.string.end.json
+      pop: true
+    - match: (")
+      scope: punctuation.definition.string.begin.json
+      set:
+        - meta_scope: meta.structure.dictionary.value.json string.quoted.double.json invalid.deprecated.unexpected-value.sublime-settings
+        - match: (")
+          scope: punctuation.definition.string.end.json
+          pop: true
+        - match: $\n?
+          scope: invalid.illegal.unclosed-string.json
+          pop: true
+    - include: expect-boolean
