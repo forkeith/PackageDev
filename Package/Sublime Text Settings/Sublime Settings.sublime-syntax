@@ -155,6 +155,11 @@ contexts:
       captures:
         1: punctuation.separator.dictionary.pair.json
       pop: true
+    - match: (\S)\s*(,)
+      captures:
+        1: invalid.illegal.expected-boolean.sublime-settings
+        2: punctuation.separator.dictionary.pair.json
+      pop: true
     - match: \S
       scope: invalid.illegal.expected-boolean.sublime-settings
 
