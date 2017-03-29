@@ -1,0 +1,9 @@
+{
+	"scope": "invalid.deprecated.unexpected-value.overlay-scroll-bars.sublime-settings",
+
+	"completions": [
+		"system",
+		"enabled",
+		"disabled",
+	]
+}

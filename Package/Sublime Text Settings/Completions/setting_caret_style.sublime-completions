@@ -1,0 +1,10 @@
+{
+	"scope": "invalid.deprecated.unexpected-value.caret-style.sublime-settings",
+
+	"completions": [
+		"smooth",
+		"phase",
+		"blink",
+		"solid",
+	]
+}

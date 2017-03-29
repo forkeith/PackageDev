@@ -1,0 +1,8 @@
+{
+	"scope": "source.json.sublime.settings meta.expect.boolean",
+
+	"completions": [
+		"true",
+		"false"
+	]
+}

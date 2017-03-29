@@ -1,9 +1,0 @@
-{
-	"scope": "meta.expect.boolean.word_wrap.sublime-settings",
-
-	"completions": [
-		"true",
-		"false",
-		"\"auto\""
-	]
-}

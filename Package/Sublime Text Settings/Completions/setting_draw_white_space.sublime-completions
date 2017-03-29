@@ -1,0 +1,9 @@
+{
+	"scope": "invalid.deprecated.unexpected-value.draw-white-space.sublime-settings",
+
+	"completions": [
+		"none",
+		"selection",
+		"all",
+	]
+}

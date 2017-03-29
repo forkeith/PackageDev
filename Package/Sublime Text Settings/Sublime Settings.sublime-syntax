@@ -16,6 +16,7 @@ contexts:
           scope: meta.structure.dictionary.json punctuation.definition.dictionary.end.json
           set: only-comments
         - include: known-booleans
+        - include: known-strings
         - match: (")
           scope: punctuation.definition.string.begin.json
           push:
@@ -95,6 +96,7 @@ contexts:
         |  match_brackets_square
         |  match_selection
         |  match_tags
+        |  mouse_wheel_switches_tabs
         |  move_to_limit_on_up_down
         |  open_files_in_new_window
         |  preview_on_click
@@ -126,10 +128,10 @@ contexts:
         3: punctuation.definition.string.end.json
       scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
       push: [expect-boolean, expect-colon]
-    - match: (")(word_wrap)(")
+    - match: (")(word_wrap|gpu_window_buffer)(")
       captures:
         1: punctuation.definition.string.begin.json
-        2: keyword.other.key.boolean.sublime-settings
+        2: keyword.other.key.boolean.auto.sublime-settings
         3: punctuation.definition.string.end.json
       scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
       push: [expect-boolean-or-auto, expect-colon]
@@ -144,17 +146,20 @@ contexts:
     - match: \S
       scope: invalid.illegal.expected-comma.inside-dictionary.json
 
-  expect-boolean:
-    - meta_scope: meta.expect.boolean.sublime-settings
-    - match: \b(?:true|false)\b
-      scope: meta.structure.dictionary.value.json constant.language.json
-      set: in-dictionary-expect-comma
+  in-dictionary-expect-value:
     - include: comments
     - match: \s*(?=[},])(,)?
       scope: invalid.illegal.expected-value.json
       captures:
         1: punctuation.separator.dictionary.pair.json
       pop: true
+
+  expect-boolean:
+    - meta_scope: meta.expect.boolean.sublime-settings
+    - match: \b(?:true|false)\b
+      scope: meta.structure.dictionary.value.json constant.language.json
+      set: in-dictionary-expect-comma
+    - include: in-dictionary-expect-value
     - match: (\S)\s*(,)
       captures:
         1: invalid.illegal.expected-boolean.sublime-settings
@@ -164,7 +169,7 @@ contexts:
       scope: invalid.illegal.expected-boolean.sublime-settings
 
   expect-boolean-or-auto:
-    - meta_scope: meta.expect.boolean.word_wrap.sublime-settings
+    - meta_scope: meta.expect.boolean.auto.sublime-settings
     - match: (")(auto)(")
       scope: meta.structure.dictionary.value.json string.quoted.double.json
       captures:
@@ -174,10 +179,241 @@ contexts:
     - match: (")
       scope: punctuation.definition.string.begin.json
       set:
-        - meta_scope: meta.structure.dictionary.value.json string.quoted.double.json invalid.deprecated.unexpected-value.sublime-settings
-        - match: (")|($\n?)
-          captures:
-            1: punctuation.definition.string.end.json
-            2: invalid.illegal.unclosed-string.json
-          set: in-dictionary-expect-comma
+        - meta_scope: meta.structure.dictionary.value.json string.quoted.double.json invalid.deprecated.unexpected-value.auto.sublime-settings
+        - include: close-string-dict-value
     - include: expect-boolean
+
+  known-strings:
+    - match: |-
+        (?x)
+        (")
+        (
+            font_face
+        |   word_separators
+        )
+        (")
+      captures:
+        1: punctuation.definition.string.begin.json
+        2: keyword.other.key.string.sublime-settings
+        3: punctuation.definition.string.end.json
+      scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
+      push: [expect-string-dict-value, expect-colon]
+    - match: |-
+        (?x)
+        (")
+        (
+            color_scheme
+        |   dictionary
+        |   theme
+        )
+        (")
+      captures:
+        1: punctuation.definition.string.begin.json
+        2: keyword.other.key.string.file-path.sublime-settings
+        3: punctuation.definition.string.end.json
+      scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
+      push: [expect-string-dict-value, expect-colon]
+    - match: (")(spelling_selector|auto_complete_selector)(")
+      scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
+      captures:
+        1: punctuation.definition.string.begin.json
+        2: keyword.other.key.string.scope-selector.sublime-settings
+        3: punctuation.definition.string.end.json
+      push: [expect-scope-selector, expect-colon]
+    - match: (")(caret_style)(")
+      captures:
+        1: punctuation.definition.string.begin.json
+        2: keyword.other.key.string.caret-style.sublime-settings
+        3: punctuation.definition.string.end.json
+      scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
+      push: [expect-string-dict-value-caret-style, expect-colon]
+    - match: (")(draw_white_space)(")
+      captures:
+        1: punctuation.definition.string.begin.json
+        2: keyword.other.key.string.draw-white-space.sublime-settings
+        3: punctuation.definition.string.end.json
+      scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
+      push: [expect-string-dict-value-draw-white-space, expect-colon]
+    - match: (")(default_encoding|fallback_encoding)(")
+      captures:
+        1: punctuation.definition.string.begin.json
+        2: keyword.other.key.string.draw-white-space.sublime-settings
+        3: punctuation.definition.string.end.json
+      scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
+      push: [expect-string-dict-value-encoding, expect-colon]
+    - match: (")(default_line_ending)(")
+      captures:
+        1: punctuation.definition.string.begin.json
+        2: keyword.other.key.string.draw-white-space.sublime-settings
+        3: punctuation.definition.string.end.json
+      scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
+      push: [expect-string-dict-value-default-line-ending, expect-colon]
+    - match: (")(overlay_scroll_bars)(")
+      captures:
+        1: punctuation.definition.string.begin.json
+        2: keyword.other.key.string.draw-white-space.sublime-settings
+        3: punctuation.definition.string.end.json
+      scope: meta.structure.dictionary.key.json meta.main-key.sublime-settings string.quoted.double.json
+      push: [expect-string-dict-value-overlay-scroll-bars, expect-colon]
+
+  expect-string-dict-value:
+    - match: '"'
+      scope: punctuation.definition.string.begin.json
+      set:
+        - meta_scope: meta.structure.dictionary.value.json string.quoted.double.json
+        - include: close-string-dict-value
+    - include: in-dictionary-expect-string
+
+  in-dictionary-expect-string:
+    - include: in-dictionary-expect-value
+    - match: '[^\s",}]+'
+      scope: invalid.illegal.expected-string.sublime-settings
+
+  expect-scope-selector:
+    - match: '"'
+      scope: punctuation.definition.string.begin.json
+      set: scope-selector
+    - include: in-dictionary-expect-string
+
+  scope-selector:
+    - meta_scope: meta.structure.dictionary.value.json meta.scope-selector.sublime-settings string.quoted.double.json
+    - meta_content_scope: source.scope-selector.embedded.json-string
+    - include: close-string-dict-value
+    - match: ''
+      push:
+        - include: scope:source.scope-selector
+      with_prototype:
+        - match: (?="|$)
+          pop: true
+        - include: string-escape
+
+  string-escape:
+    - match: |-
+        (?x)
+        \\ (?:
+            ["\\/bfnrt]
+          | u \h{4}
+        )
+      scope: constant.character.escape.json
+    - match: \\.
+      scope: invalid.illegal.unrecognized-string-escape.json
+
+  close-string-dict-value:
+    - include: string-escape
+    - match: (")|($\n?)
+      captures:
+        1: punctuation.definition.string.end.json
+        2: invalid.illegal.unclosed-string.json
+      set: in-dictionary-expect-comma
+
+  expect-string-dict-value-caret-style:
+    - meta_scope: meta.expect.string.caret-style.sublime-settings
+    - match: (")(smooth|phase|blink|solid)(")
+      scope: meta.structure.dictionary.value.json string.quoted.double.json
+      captures:
+        1: punctuation.definition.string.begin.json
+        3: punctuation.definition.string.end.json
+      set: in-dictionary-expect-comma
+    - match: (")
+      scope: punctuation.definition.string.begin.json
+      set:
+        - meta_scope: meta.structure.dictionary.value.json string.quoted.double.json invalid.deprecated.unexpected-value.caret-style.sublime-settings
+        - include: close-string-dict-value
+    - include: in-dictionary-expect-string
+
+  expect-string-dict-value-draw-white-space:
+    - meta_scope: meta.expect.string.draw-white-space.sublime-settings
+    - match: (")(none|selection|all)(")
+      scope: meta.structure.dictionary.value.json string.quoted.double.json
+      captures:
+        1: punctuation.definition.string.begin.json
+        3: punctuation.definition.string.end.json
+      set: in-dictionary-expect-comma
+    - match: (")
+      scope: punctuation.definition.string.begin.json
+      set:
+        - meta_scope: meta.structure.dictionary.value.json string.quoted.double.json invalid.deprecated.unexpected-value.draw-white-space.sublime-settings
+        - include: close-string-dict-value
+    - include: in-dictionary-expect-string
+
+  expect-string-dict-value-encoding:
+    - meta_scope: meta.expect.string.encoding.sublime-settings
+    - match: |-
+          (?x)
+          (")
+          (?i:
+             utf-8
+          |  utf-16[ ]le
+          |  utf-16[ ]be
+          |  Western[ ]\(Windows[ ]1252\)
+          |  Western[ ]\(ISO[ ]8859-1\)
+          |  Western[ ]\(ISO[ ]8859-3\)
+          |  Western[ ]\(ISO[ ]8859-15\)
+          |  Western[ ]\(Mac[ ]Roman\)
+          |  DOS[ ]\(CP[ ]437\)
+          |  Arabic[ ]\(Windows[ ]1256\)
+          |  Arabic[ ]\(ISO[ ]8859-6\)
+          |  Baltic[ ]\(Windows[ ]1257\)
+          |  Baltic[ ]\(ISO[ ]8859-4\)
+          |  Celtic[ ]\(ISO[ ]8859-14\)
+          |  Central[ ]European[ ]\(Windows[ ]1250\)
+          |  Central[ ]European[ ]\(ISO[ ]8859-2\)
+          |  Cyrillic[ ]\(Windows[ ]1251\)
+          |  Cyrillic[ ]\(Windows[ ]866\)
+          |  Cyrillic[ ]\(ISO[ ]8859-5\)
+          |  Cyrillic[ ]\(KOI8-R\)
+          |  Cyrillic[ ]\(KOI8-U\)
+          |  Estonian[ ]\(ISO[ ]8859-13\)
+          |  Greek[ ]\(Windows[ ]1253\)
+          |  Greek[ ]\(ISO[ ]8859-7\)
+          |  Hebrew[ ]\(Windows[ ]1255\)
+          |  Hebrew[ ]\(ISO[ ]8859-8\)
+          |  Nordic[ ]\(ISO[ ]8859-10\)
+          |  Romanian[ ]\(ISO[ ]8859-16\)
+          |  Turkish[ ]\(Windows[ ]1254\)
+          |  Turkish[ ]\(ISO[ ]8859-9\)
+          |  Vietnamese[ ]\(Windows[ ]1258\)
+          |  Hexadecimal
+          )
+          (")
+      scope: meta.structure.dictionary.value.json string.quoted.double.json
+      captures:
+        1: punctuation.definition.string.begin.json
+        3: punctuation.definition.string.end.json
+      set: in-dictionary-expect-comma
+    - match: (")
+      scope: punctuation.definition.string.begin.json
+      set:
+        - meta_scope: meta.structure.dictionary.value.json string.quoted.double.json invalid.deprecated.unexpected-value.encoding.sublime-settings
+        - include: close-string-dict-value
+    - include: in-dictionary-expect-string
+
+  expect-string-dict-value-default-line-ending:
+    - meta_scope: meta.expect.string.default-line-encoding.sublime-settings
+    - match: (")(system|windows|unix)(")
+      scope: meta.structure.dictionary.value.json string.quoted.double.json
+      captures:
+        1: punctuation.definition.string.begin.json
+        3: punctuation.definition.string.end.json
+      set: in-dictionary-expect-comma
+    - match: (")
+      scope: punctuation.definition.string.begin.json
+      set:
+        - meta_scope: meta.structure.dictionary.value.json string.quoted.double.json invalid.deprecated.unexpected-value.default-line-encoding.sublime-settings
+        - include: close-string-dict-value
+    - include: in-dictionary-expect-string
+
+  expect-string-dict-value-overlay-scroll-bars:
+    - meta_scope: meta.expect.string.overlay-scroll-bars.sublime-settings
+    - match: (")(system|enabled|disabled)(")
+      scope: meta.structure.dictionary.value.json string.quoted.double.json
+      captures:
+        1: punctuation.definition.string.begin.json
+        3: punctuation.definition.string.end.json
+      set: in-dictionary-expect-comma
+    - match: (")
+      scope: punctuation.definition.string.begin.json
+      set:
+        - meta_scope: meta.structure.dictionary.value.json string.quoted.double.json invalid.deprecated.unexpected-value.overlay-scroll-bars.sublime-settings
+        - include: close-string-dict-value
+    - include: in-dictionary-expect-string

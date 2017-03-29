@@ -1,0 +1,9 @@
+{
+	"scope": "invalid.deprecated.unexpected-value.default-line-ending.sublime-settings",
+
+	"completions": [
+		"system",
+		"windows",
+		"unix",
+	]
+}
